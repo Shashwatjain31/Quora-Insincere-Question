@@ -15,3 +15,7 @@ Naive Bayes is a simple technique for constructing classifiers: models that assi
 
 
 After evaluating differnt approches found out that the best accuracy is achieved by ----------- algorithm.
+
+### Tools Required: 
+Anaconda -  Jupyter Notebook, MS Excel
+
