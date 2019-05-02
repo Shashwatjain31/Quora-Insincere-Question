@@ -19,3 +19,5 @@ After evaluating differnt approches found out that the best accuracy is achieved
 ### Tools Required: 
 Anaconda -  Jupyter Notebook, MS Excel
 
+### Setup
+We have used the Anaconda distribution for downloading all required packages and creating virtual environment. You can use pip for your purposes. For a proper execution of code, Python version 3.6.6 is needed. Ideally any version above 3.6.6 should also work.
