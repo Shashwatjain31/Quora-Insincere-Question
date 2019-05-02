@@ -3,6 +3,12 @@ A problem today for major websites is, how to handle toxic and divisive content?
 Quora is a platform that empowers people to learn from each other. On Quora, people can ask questions and connect with others who contribute unique insights and quality answers. A key challenge is to remove insincere questions, those founded upon false premises, or that intend to make a statement rather than look for helpful answers.
 In this Project we developed models that identify and flag insincere questions. With this model, Quora can develop more scalable methods to detect toxic and misleading content.
 
+### Dataset:
+The dataset can be downloaded from: https://www.kaggle.com/c/quora-insincere-questions-classification
+The train data has 3 columns question id (qid), question_text and target. Target = 0 means sincere question and target = 1 means insincere question.
+The test data set has 2 columns- question id and question_text.
+
+
 ## Algorithms Used:
 
 In this we have used 3 approches:
