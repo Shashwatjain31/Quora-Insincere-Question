@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import os
 import string
 import random
@@ -19,17 +13,10 @@ from spacy.lang.en import English
 from sklearn.model_selection import train_test_split
 from imblearn.under_sampling import RandomUnderSampler
 
-
-# In[ ]:
-
-
 train_df= pd.read_csv("256/train.csv")
 
 
 # UNDERSAMPLING
-
-# In[ ]:
-
 
 sincerequestions=train_df[:][train_df['target']==0]
 insincerequestions=train_df[:][train_df['target']==1]
@@ -39,9 +26,6 @@ train_temp = train_under.drop(['target'],axis=1)
 
 
 # LOADING EMBEDDINGS FROM GLOVE
-
-# In[ ]:
-
 
 embeddings_index = {}
 f = open('256/embeddings/glove.840B.300d/glove.840B.300d.txt')
@@ -57,9 +41,6 @@ print('Found %s word vectors.' % len(embeddings_index))
 
 # PREPROCESSING
 
-# In[ ]:
-
-
 punctuations = string.punctuation
 stopwords = list(STOP_WORDS)
 
@@ -71,23 +52,12 @@ def spacy_tokenizer(sentence):
     mytokens = " ".join([i for i in mytokens])
     return mytokens
 
-
-# In[ ]:
-
-
 train_temp["question_text"] = train_temp["question_text"].apply(lambda x: spacy_tokenizer(x))
 
 
 # SPLITTING TRAIN AND TEST
 
-# In[ ]:
-
-
 train_x, val_x,train_y,val_y = train_test_split(train_temp,train_under['target'],test_size=.20, random_state=0)
-
-
-# In[ ]:
-
 
 # Convert values to embeddings
 def text_to_array(text):
@@ -100,11 +70,7 @@ def text_to_array(text):
 X_train = [text_to_array(X_text) for X_text in tqdm(train_x["question_text"])]
 X_val = [text_to_array(X_text) for X_text in tqdm(val_x["question_text"])]
 
-
 # RESHAPING 3D ARRAY
-
-# In[ ]:
-
 
 import numpy as np
 trainvects=np.asarray(X_train)
@@ -117,9 +83,6 @@ X_val = valvects.reshape((msamples,mx*my))
 
 # LOGISTIC REGRESSION
 
-# In[ ]:
-
-
 from sklearn.linear_model import LogisticRegression
 logr = LogisticRegression()
 logr.fit(X_train,train_y)
@@ -127,9 +90,6 @@ y_pred1=logr.predict(X_val)
 
 
 # XG BOOST CLASSIFIER
-
-# In[ ]:
-
 
 from xgboost import XGBClassifier
 xgb = XGBClassifier()
@@ -139,9 +99,6 @@ y_pred2 = xgb.predict(X_val)
 
 # BERNOULLI NAIVE BAYES CLASSIFIER
 
-# In[ ]:
-
-
 from sklearn.naive_bayes import BernoulliNB
 bnb = BernoulliNB(alpha=0.01)
 bnb.fit(X_train,train_y)
@@ -149,15 +106,7 @@ y_pred3 = bnb.predict(X_val)
 
 
 # EVALUATION USING ACCURACY SCORE and F1 SCORE
-
-# In[ ]:
-
-
 from sklearn.metrics import f1_score, balanced_accuracy_score
-
-
-# In[ ]:
-
 
 def evaluate(model,y_predict):
     print(model)
@@ -166,46 +115,21 @@ def evaluate(model,y_predict):
     print("F1 score:",f1)
     print("Accuracy:",accuracy)
     return f1,accuracy
-    
-
-
-# In[ ]:
-
 
 f1_logr,acc_logr=evaluate("STANDARD VECTOR CLASSIFIER",y_pred1)
 
-
-# In[ ]:
-
-
 f1_xgb,acc_xgb=evaluate("XGBOOST CLASSIFIER",y_pred2)
-
-
-# In[ ]:
-
 
 f1_bnb,acc_bnb=evaluate("BERNOULLI NAIVE BAYES",y_pred3)
 
 
 # EVALUATION GRAPH
-
-# In[ ]:
-
-
 import matplotlib.pyplot as plt
-
-
-# In[ ]:
-
 
 objects = ('STANDARD VECTOR CLASSIFIER', 'XGBOOST CLASSIFIER', 'BERNOULLI NAIVE BAYES')
 y_pos = np.arange(len(objects))
 performance1 = [f1_logr,f1_xgb,f1_bnb]
 performance2=[acc_logr,acc_xgb,acc_bnb]
-
-
-# In[ ]:
-
 
 plt.bar(y_pos, performance1, align='center', alpha=0.5)
 plt.xticks(y_pos, objects)
@@ -214,20 +138,9 @@ plt.title('Classifier')
 
 plt.show()
 
-
-# In[ ]:
-
-
 plt.bar(y_pos, performance2, align='center', alpha=0.5)
 plt.xticks(y_pos, objects)
 plt.ylabel('Accuracy')
 plt.title('Classifier')
 
 plt.show()
-
-
-# In[ ]:
-
-
-
-
