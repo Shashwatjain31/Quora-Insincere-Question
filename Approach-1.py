@@ -1,64 +1,26 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
 from tqdm import tqdm
 tqdm.pandas()
 train = pd.read_csv("256/train.csv")
 
-
-# In[2]:
-
-
 train.head()
-
-
-# In[3]:
-
 
 sincerequestions=train[:][train['target']==0]
 insincerequestions=train[:][train['target']==1]
 
-
-# In[4]:
-
-
 print("Sincere questions:",len(sincerequestions))
 print("Insincere questions:",len(insincerequestions))
-
-
-# UNDERSAMPLING TO HANDLE UNBALANCED DATA
-
-# In[5]:
-
 
 from imblearn.under_sampling import RandomUnderSampler
 sincerequestions_under=sincerequestions.sample(len(insincerequestions))
 
-
-# In[6]:
-
-
 train_under = pd.concat([sincerequestions_under,insincerequestions], axis=0)
-
-
-# In[7]:
-
 
 train_temp = train_under.drop(['target'],axis=1)
 
-
 # Preprocessing
-
-# In[8]:
-
-
 #REMOVE PUNCTUATIONS
 def clean_text(x):
-
     x = str(x)
     for punct in "/-":
         x = x.replace(punct, ' ')
@@ -67,10 +29,6 @@ def clean_text(x):
     for punct in '?!.,"#$%\'()*+-/:;<=>@[\\]^_`{|}~' + '“”’':
         x = x.replace(punct, '')
     return x
-
-
-# In[9]:
-
 
 import re
 #REMOVE NUMBERS
@@ -81,10 +39,6 @@ def clean_numbers(x):
     x = re.sub('[0-9]{3}', '###', x)
     x = re.sub('[0-9]{2}', '##', x)
     return x
-
-
-# In[10]:
-
 
 #REMOVE MISPELLED WORDS
 def _get_mispell(mispell_dict):
@@ -118,10 +72,6 @@ def replace_typical_misspell(text):
 
     return mispellings_re.sub(replace, text)
 
-
-# In[11]:
-
-
 train_temp["question_text"] = train_temp["question_text"].apply(lambda x: clean_text(x))
 train_temp["question_text"] = train_temp["question_text"].apply(lambda x: clean_numbers(x))
 train_temp["question_text"] = train_temp["question_text"].apply(lambda x: replace_typical_misspell(x))
@@ -129,15 +79,8 @@ train_temp["question_text"] = train_temp["question_text"].apply(lambda x: replac
 
 # SPLITTING TRAIN AND TEST
 
-# In[12]:
-
-
 from sklearn.model_selection import train_test_split
 train_x, val_x,train_y,val_y = train_test_split(train_temp,train_under['target'],test_size=.20, random_state=0)
-
-
-# In[13]:
-
 
 print(len(train_x))
 print(len(val_x))
@@ -145,26 +88,16 @@ print(len(val_x))
 
 # TFIDF VECTORIZER
 
-# In[14]:
-
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 vectorizer = TfidfVectorizer(max_features=100000, stop_words='english',ngram_range=(1,3))
 X_train = vectorizer.fit_transform(train_x["question_text"])
 X_val = vectorizer.transform(val_x["question_text"])
-
-
-# In[15]:
-
 
 features=vectorizer.get_feature_names()
 len(features)
 
 
 # LOGISTIC REGRESSION
-
-# In[30]:
-
 
 from sklearn.linear_model import LogisticRegression
 logr = LogisticRegression()
@@ -174,9 +107,6 @@ y_pred1=logr.predict(X_val)
 
 # XG BOOST CLASSIFIER
 
-# In[16]:
-
-
 from xgboost import XGBClassifier
 xgb = XGBClassifier()
 xgb.fit(X_train,train_y)
@@ -185,9 +115,6 @@ y_pred2 = xgb.predict(X_val)
 
 # BERNOULLI NAIVE BAYES CLASSIFIER
 
-# In[23]:
-
-
 from sklearn.naive_bayes import BernoulliNB
 bnb = BernoulliNB(alpha=0.01)
 bnb.fit(X_train,train_y)
@@ -195,15 +122,7 @@ y_pred3 = bnb.predict(X_val)
 
 
 # EVALUATION USING ACCURACY SCORE and F1 SCORE
-
-# In[54]:
-
-
 from sklearn.metrics import f1_score, balanced_accuracy_score
-
-
-# In[55]:
-
 
 def evaluate(model,y_predict):
     print(model)
@@ -212,47 +131,22 @@ def evaluate(model,y_predict):
     print("F1 score:",f1)
     print("Accuracy:",accuracy)
     return f1,accuracy
-    
-
-
-# In[56]:
-
 
 f1_logr,acc_logr=evaluate("LOGISTIC REGRESSION",y_pred1)
 
-
-# In[57]:
-
-
 f1_xgb,acc_xgb=evaluate("XGBOOST CLASSIFIER",y_pred2)
-
-
-# In[58]:
-
 
 f1_bnb,acc_bnb=evaluate("BERNOULLI NAIVE BAYES",y_pred3)
 
-
 # EVALUATION GRAPH
-
-# In[59]:
-
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-# In[60]:
-
 
 objects = ('LOGISTIC REGRESSION', 'XGBOOST CLASSIFIER', 'BERNOULLI NAIVE BAYES')
 y_pos = np.arange(len(objects))
 performance1 = [f1_logr,f1_xgb,f1_bnb]
 performance2=[acc_logr,acc_xgb,acc_bnb]
-
-
-# In[61]:
-
 
 plt.figure(figsize = (10,10))
 plt.bar(y_pos, performance1, align='center', alpha=0.5)
@@ -262,10 +156,6 @@ plt.title('Classifier')
 
 plt.show()
 
-
-# In[62]:
-
-
 plt.figure(figsize = (10,10))
 plt.bar(y_pos, performance2, align='center', alpha=0.5)
 plt.xticks(y_pos, objects)
@@ -273,10 +163,3 @@ plt.ylabel('Accuracy')
 plt.title('Classifier')
 
 plt.show()
-
-
-# In[ ]:
-
-
-
-
